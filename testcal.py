@@ -176,7 +176,7 @@ const TR = {
     result: "Результат", arrival: "Расчётное прибытие",
     reserve: "Запас", late: "Опоздание",
     pureDrive: "Чистое время езды", totalTime: "Итоговое время",
-    addons: "Допы", remaining: "Остаток вождения",
+    addons: "Допы", remaining: "Остаток вождения", restBlocks: "Использовано девяток",
     scheduleTitle: "Режим труда и отдыха",
     legDrive: "Езда", legBreak: "Перерыв 45 мин", legRest: "Отдых 9 ч",
     breakCalc: "= 1 ч в расчёте",
@@ -200,7 +200,7 @@ const TR = {
     result: "Result", arrival: "Estimated arrival",
     reserve: "Buffer", late: "Delay",
     pureDrive: "Pure drive time", totalTime: "Total time",
-    addons: "Extras", remaining: "Drive remaining",
+    addons: "Extras", remaining: "Drive remaining", restBlocks: "Rest blocks used",
     scheduleTitle: "Work & rest schedule",
     legDrive: "Drive", legBreak: "Break 45 min", legRest: "Rest 9 h",
     breakCalc: "= 1 h in calc",
@@ -224,7 +224,7 @@ const TR = {
     result: "Rezultāts", arrival: "Paredzamais ierašanās laiks",
     reserve: "Rezerve", late: "Kavēšanās",
     pureDrive: "Tīrais braukšanas laiks", totalTime: "Kopējais laiks",
-    addons: "Papildus", remaining: "Atlikušais braukšanas laiks",
+    addons: "Papildus", remaining: "Atlikušais braukšanas laiks", restBlocks: "Izmantotās devītnieces",
     scheduleTitle: "Darba un atpūtas režīms",
     legDrive: "Braukšana", legBreak: "Pārtraukums 45 min", legRest: "Atpūta 9 h",
     breakCalc: "= 1 h aprēķinā",
@@ -693,6 +693,7 @@ function App() {
                   [t.totalTime,   `${result.totalWay} ${t.h}`],
                   [t.addons,      `${result.extra} ${t.h}`],
                   [t.remaining,   `${Math.floor(result.driveRemaining)} ${t.h}`],
+                  [t.restBlocks,  `${result.restBlocks}`],
                 ].map(([l, v]) => (
                   <div key={l} className="stat-row">
                     <span className="stat-label">{l}</span>
