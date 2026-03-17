@@ -608,6 +608,7 @@ function App() {
                   <span className="hint">{t.max} {maxDrive}ч</span>
                 </div>
                 <input type="number" min="0" max={maxDrive} step="0.5" value={alreadyDriven}
+                  style={{background: alreadyDriven > 0 ? "rgba(234,179,8,0.25)" : undefined, borderColor: alreadyDriven > 0 ? "#ca8a04" : undefined}}
                   onChange={e => setAlreadyDriven(Math.min(maxDrive, Number(e.target.value)))} />
               </div>
             </div>
@@ -658,13 +659,15 @@ function App() {
               <div className="grid2">
                 <div>
                   <label className="field-label">{t.ferry}</label>
-                  <select value={ferry} onChange={e => setFerry(e.target.value)}>
+                  <select value={ferry} onChange={e => setFerry(e.target.value)}
+                    style={{background: ferry !== "0" ? "rgba(234,179,8,0.25)" : undefined, borderColor: ferry !== "0" ? "#ca8a04" : undefined}}>
                     <option value="0">{t.ferryNo}</option><option value="1">{t.ferryH1}</option><option value="2">{t.ferryH2}</option>
                   </select>
                 </div>
                 <div>
                   <label className="field-label">{t.other}</label>
-                  <select value={misc} onChange={e => setMisc(e.target.value)}>
+                  <select value={misc} onChange={e => setMisc(e.target.value)}
+                    style={{background: misc !== "0" ? "rgba(234,179,8,0.25)" : undefined, borderColor: misc !== "0" ? "#ca8a04" : undefined}}>
                     {[0,1,2,3,4,5].map(v => <option key={v} value={v}>{v}</option>)}
                   </select>
                 </div>
