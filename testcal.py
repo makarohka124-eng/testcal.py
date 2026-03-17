@@ -488,7 +488,7 @@ function App() {
     gas, trailer, loading, ferry, misc,
   }), [useCurrent, startDate, startHour, startMin, tz, dist, speed, mode, alreadyDriven, gas, trailer, loading, ferry, misc]);
 
-  const arrivalLabel = useMemo(() => localeDateRu(result.arrival, tz, lang) + " " + tzLabel, [result.arrival, tz, lang]);
+  const arrivalLabel = useMemo(() => { const s = localeDateRu(result.arrival, tz, lang) + " " + tzLabel; return s.charAt(0).toUpperCase() + s.slice(1); }, [result.arrival, tz, lang]);
 
   const fixDiff = useMemo(() => {
     if (!useFix) return null;
