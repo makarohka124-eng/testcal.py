@@ -4,13 +4,41 @@ import pytz
 import math
 
 # Настройка страницы
-st.set_page_config(page_title="Logist Calc", layout="wide", page_icon="🚛")
+st.set_page_config(page_title="Logist Calc Pro", layout="wide", page_icon="🚛")
 
-# Стили
+# Продвинутый CSS для профессионального интерфейса
 st.markdown("""
 <style>
-    .block-container {padding-top: 1rem; padding-bottom: 0rem;}
-    .footer {position: fixed; left: 10px; bottom: 10px; color: grey; font-size: 11px; z-index: 100;}
+    /* Основной фон и шрифты */
+    .stApp { background-color: #f4f7f9; }
+    
+    /* Стилизация блоков */
+    div[data-testid="stVerticalBlock"] > div {
+        background-color: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+        margin-bottom: 10px;
+    }
+    
+    /* Стили для заголовков */
+    h1, h2, h3 { color: #1e293b !important; font-weight: 700 !important; }
+    
+    /* Убираем лишние отступы */
+    .block-container { padding-top: 2rem; }
+    
+    /* Красивая подпись */
+    .footer {
+        position: fixed;
+        left: 20px;
+        bottom: 20px;
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    /* Стиль для метрик */
+    [data-testid="stMetricValue"] { font-size: 24px !important; color: #0f172a; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -18,121 +46,97 @@ st.markdown("""
 cet_zone = pytz.timezone('Europe/Berlin')
 now_cet = datetime.now(cet_zone)
 
-st.title("🚛 Калькулятор")
+# --- ШАПКА ---
+st.title("🚛 Logist Pro Calc")
+st.markdown(f"**Текущее время в Европе:** `{now_cet.strftime('%H:%M')} CET` | `{now_cet.strftime('%d.%m.%Y')}`")
 
-# --- ИНИЦИАЛИЗАЦИЯ ПАМЯТИ ---
-if 'start_date' not in st.session_state:
-    st.session_state.start_date = now_cet.date()
-if 'start_time' not in st.session_state:
-    st.session_state.start_time = now_cet.time()
+# --- ЛИНИЯ 1: СТАРТ РЕЙСА ---
+with st.container():
+    st.subheader("⏱️ Время отправления")
+    c1, c2, c3 = st.columns([1, 1.5, 2.5])
+    
+    with c1:
+        use_current = st.checkbox("Сейчас", value=True, key="use_curr")
+    with c2:
+        if not use_current:
+            start_date = st.date_input("Дата выезда", now_cet.date())
+        else:
+            st.info(f"📅 {now_cet.strftime('%d.%m')}")
+    with c3:
+        if not use_current:
+            start_time = st.time_input("Время (CET)", now_cet.time())
+            start_dt = cet_zone.localize(datetime.combine(start_date, start_time))
+        else:
+            start_dt = now_cet
+            st.info(f"🕒 {now_cet.strftime('%H:%M')} CET")
 
-# --- ЛИНИЯ 1: ВРЕМЯ ВЫЕЗДА ---
-c1, c2, c3 = st.columns([1, 1, 2])
-with c1:
-    use_current = st.checkbox("Выезд: Сейчас", value=True, key="use_curr")
-with c2:
-    if not use_current:
-        st.session_state.start_date = st.date_input("Дата выезда", st.session_state.start_date)
-    else:
-        st.write("📅 " + now_cet.strftime('%d.%m'))
-with c3:
-    if not use_current:
-        st.session_state.start_time = st.time_input("Время выезда (CET)", st.session_state.start_time)
-        start_dt = cet_zone.localize(datetime.combine(st.session_state.start_date, st.session_state.start_time))
-    else:
-        start_dt = now_cet
-        st.write("🕒 " + now_cet.strftime('%H:%M') + " CET")
+# --- ЛИНИЯ 2: ПАРАМЕТРЫ И ДОПЫ ---
+col_left, col_right = st.columns([1, 1], gap="large")
 
-st.divider()
+with col_left:
+    st.subheader("🚩 Маршрут и режим")
+    sub_c1, sub_c2 = st.columns(2)
+    with sub_c1:
+        dist = st.number_input("Расстояние, км:", min_value=1, value=1000, step=10)
+        speed = st.slider("Средняя скорость:", 40, 90, 70)
+    with sub_c2:
+        mode = st.segmented_control("Режим работы:", ["Одиночка", "Экипаж"], default="Одиночка")
+        limit = 9.0 if mode == "Одиночка" else 18.0
+        already_driven = st.number_input("Уже проехал (ч):", 0.0, limit, 0.0, 0.5)
 
-# --- ОСНОВНОЙ БЛОК ---
-main_col1, main_divider, main_col2 = st.columns([4, 0.1, 3])
-
-with main_col1:
-    st.subheader("🏁 Параметры рейса")
-    sc1, sc2 = st.columns(2)
-    with sc1:
-        dist = st.number_input("КМ:", min_value=1, value=1000, key="dist")
-        speed = st.slider("Скорость:", 40, 90, 70, key="speed")
-    with sc2:
-        mode = st.radio("Режим:", ["Одиночка", "Экипаж"], horizontal=True, key="mode")
-        max_drive_limit = 9.0 if mode == "Одиночка" else 18.0
-        already_driven = st.number_input(f"Уже проехал сегодня (ч):", 0.0, max_drive_limit, 0.0, 0.5, key="already")
-
-with main_divider:
-    st.markdown('<div style="border-left: 1px solid grey; height: 300px; margin-left: 20px; opacity: 0.3;"></div>', unsafe_allow_html=True)
-
-with main_col2:
-    st.subheader("⏱️ Допы и Срок")
-
-    # СЕКЦИЯ FIX TIME
-    use_fix = st.checkbox("📍 Фикс время (выгрузка)", value=False)
-    if use_fix:
-        fcol1, fcol2 = st.columns(2)
-        with fcol1:
-            fix_date = st.date_input("Дата FIX", now_cet.date() + timedelta(days=1))
-        with fcol2:
-            fix_time = st.time_input("Время FIX", datetime.strptime("08:00", "%H:%M").time())
-        fix_dt = cet_zone.localize(datetime.combine(fix_date, fix_time))
-
-    st.write("**Дополнительно:**")
-    ec1, ec2 = st.columns(2)
-    with ec1:
-        gas = st.checkbox("Заправка (+1ч)")
-        trailer = st.checkbox("Перецеп (+1ч)")
-        loading = st.checkbox("Загрузка (+2ч)")
-    with ec2:
-        ferry_option = st.selectbox("Паром:", ["Нет", "1 час", "2 часа"])
-        misc = st.selectbox("Другое (ч):", [0, 1, 2, 3, 4, 5])
+with col_right:
+    st.subheader("➕ Остановки и задержки")
+    sub_c3, sub_c4 = st.columns(2)
+    with sub_c3:
+        ferry_time_val = st.selectbox("Паром:", ["Нет", "1 час", "2 часа"])
+        misc = st.selectbox("Прочее (ч):", [0, 1, 2, 3, 4, 5])
+    with sub_c4:
+        st.write("**Доп. опции:**")
+        gas = st.checkbox("⛽ Заправка (+1ч)")
+        trailer = st.checkbox("🔄 Перецеп (+1ч)")
+        loading = st.checkbox("📦 Загрузка (+2ч)")
 
 # --- МАТЕМАТИКА ---
 extra_time = (1 if gas else 0) + (1 if trailer else 0) + (2 if loading else 0) + misc
-ferry_time = 1 if "1 час" in ferry_option else (2 if "2 часа" in ferry_option else 0)
+ferry_h = 1 if "1 час" in ferry_time_val else (2 if "2 часа" in ferry_time_val else 0)
+
 pure_drive = dist / speed
-limit = 9.0 if mode == "Одиночка" else 18.0
 current_left = max(0.0, limit - already_driven)
 
 if mode == "Одиночка":
     if pure_drive <= current_left:
-        total_way = pure_drive + (1 if (already_driven < 4.5 and (already_driven + pure_drive) > 4.5) else 0)
         drive_remaining = current_left - pure_drive
+        total_breaks = 1 if (already_driven < 4.5 and (already_driven + pure_drive) > 4.5) else 0
+        total_rests = 0
     else:
-        rem = pure_drive - current_left
-        shifts = math.ceil(rem / 9)
-        total_way = pure_drive + (shifts * 9) + (1 if already_driven < 4.5 else 0) + (shifts * 2)
-        drive_remaining = 9 - (rem % 9) if rem % 9 != 0 else 9
+        rem_after = pure_drive - current_left
+        rests_count = math.ceil(rem_after / 9)
+        drive_remaining = 9 - (rem_after % 9) if rem_after % 9 != 0 else 9
+        total_breaks = (1 if already_driven < 4.5 else 0) + (math.floor(rem_after / 9) * 2) + (1 if (rem_after % 9) > 4.5 else 0)
+        total_rests = rests_count * 9.0
+    total_way = pure_drive + total_breaks + total_rests + ferry_h + extra_time
 else:
-    shifts = math.ceil((pure_drive - current_left) / 18) if pure_drive > current_left else 0
-    total_way = pure_drive + (shifts * 9)
-    drive_remaining = current_left - pure_drive if shifts == 0 else 18 - ((pure_drive - current_left) % 18)
+    rests_count = math.ceil((pure_drive - current_left) / 18) if pure_drive > current_left else 0
+    drive_remaining = current_left - pure_drive if rests_count == 0 else 18 - ((pure_drive - current_left) % 18)
+    total_way = pure_drive + (rests_count * 9.0) + ferry_h + extra_time
 
-total_way += extra_time + ferry_time
-final_arrival = start_dt + timedelta(hours=total_way)
+arrival = start_dt + timedelta(hours=total_way)
 
-# --- ВЫВОД РЕЗУЛЬТАТОВ ---
+# --- БЛОК РЕЗУЛЬТАТОВ ---
 st.divider()
-res_c1, res_c2 = st.columns(2)
+res_c1, res_c2 = st.columns([1, 1])
 
 with res_c1:
-    if use_fix:
-        diff = fix_dt - final_arrival
-        diff_total_sec = diff.total_seconds()
-        diff_h = int(abs(diff_total_sec) // 3600)
-        diff_m = int((abs(diff_total_sec) % 3600) // 60)
-
-        if diff_total_sec >= 0:
-            st.success(f"✅ **Приезд: {final_arrival.strftime('%A, %d.%m %H:%M')}**")
-            st.info(f"Запас: **{diff_h}ч {diff_m}м**")
-        else:
-            st.error(f"🚨 **Приезд: {final_arrival.strftime('%A, %d.%m %H:%M')}**")
-            st.warning(f"ОПОЗДАНИЕ: **{diff_h}ч {diff_m}м**")
-    else:
-        st.success(f"🏁 **Приезд: {final_arrival.strftime('%A, %d.%m %H:%M')}**")
+    st.subheader("🏁 Итог прибытия")
+    st.metric(label="Время ETA (CET)", value=arrival.strftime('%H:%M'), delta=arrival.strftime('%d.%m | %A'))
+    st.info(f"Общее время в пути: **{total_way:.1f} ч.**")
 
 with res_c2:
+    st.subheader("📝 Отчет")
     check_val = "1/2" if now_cet.hour < 12 else "2/2"
-    work_string = f"{check_val} ETA  {final_arrival.strftime('%d.%m %H:%M')}CET D/H {int(drive_remaining)}"
-    st.write("**Строка для отчета:**")
-    st.code(work_string)
+    work_string = f"{check_val} ETA  {arrival.strftime('%d.%m %H:%M')}CET D/H {int(drive_remaining)}"
+    st.code(work_string, language="text")
+    st.caption("Нажми на иконку справа в поле выше, чтобы скопировать")
 
-st.markdown(f'<div class="footer">Создал: Yaroslav Makarovskyi</div>', unsafe_allow_html=True)
+# Подпись
+st.markdown('<div class="footer">👨‍💻 Создал: Yaroslav Makarovskyi</div>', unsafe_allow_html=True)
