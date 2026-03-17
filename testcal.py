@@ -327,7 +327,7 @@ function buildSchedule({ alreadyDriven, pureDrive, mode }) {
 function calcArrival({ useCurrent, startDate, startHour, startMin, tz, dist, speed, mode, alreadyDriven, gas, trailer, loading, ferry, misc }) {
   let startDt;
   if (useCurrent) {
-    startDt = getNowInTZ(tz);
+    startDt = new Date();
   } else {
     const naive = new Date(`${startDate}T${pad(startHour)}:${pad(startMin)}:00`);
     const tzNow = new Date(naive.toLocaleString("en-US", { timeZone: tz }));
