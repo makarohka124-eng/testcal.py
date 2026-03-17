@@ -181,7 +181,8 @@ const TR = {
     legDrive: "Езда", legBreak: "Перерыв 45 мин", legRest: "Отдых 9 ч",
     breakCalc: "= 1 ч в расчёте",
     reportLine: "Строка для отчёта", copy: "Копировать", copied: "✓ Скопировано",
-    orType: "или введи:", hours: "Часы", mins: "Мин",
+    orType: "или введи:", hours: "Часы", mins: "Мин", h: "ч",
+    plusH1: "+1ч", plusH2: "+2ч", kmh: "км/ч", restH: "9 ч",
     author: "Разработано Aerra AI для Kreiss при помощи Yaroslav Makarovskii",
   },
   en: {
@@ -204,7 +205,8 @@ const TR = {
     legDrive: "Drive", legBreak: "Break 45 min", legRest: "Rest 9 h",
     breakCalc: "= 1 h in calc",
     reportLine: "Report line", copy: "Copy", copied: "✓ Copied",
-    orType: "or type:", hours: "Hours", mins: "Min",
+    orType: "or type:", hours: "Hours", mins: "Min", h: "h",
+    plusH1: "+1h", plusH2: "+2h", kmh: "km/h", restH: "9 h",
     author: "Developed by Aerra AI for Kreiss with Yaroslav Makarovskii",
   },
   lv: {
@@ -227,7 +229,8 @@ const TR = {
     legDrive: "Braukšana", legBreak: "Pārtraukums 45 min", legRest: "Atpūta 9 h",
     breakCalc: "= 1 h aprēķinā",
     reportLine: "Atskaites rinda", copy: "Kopēt", copied: "✓ Nokopēts",
-    orType: "vai ievadi:", hours: "Stundas", mins: "Min",
+    orType: "vai ievadi:", hours: "Stundas", mins: "Min", h: "h",
+    plusH1: "+1h", plusH2: "+2h", kmh: "km/h", restH: "9 h",
     author: "Izstrādāts Aerra AI priekš Kreiss ar Yaroslav Makarovskii palīdzību",
   },
 };
@@ -534,7 +537,7 @@ function App() {
           </div>
           <select value={tz} onChange={e => setTz(e.target.value)}
             style={{height:30, fontSize:12, padding:"0 8px", background:"var(--bg2)", border:"0.5px solid var(--border2)", borderRadius:"var(--radius)", color:"var(--fg)", fontFamily:"inherit", outline:"none", maxWidth:200}}>
-            {TIMEZONES.map(t => <option key={t.tz} value={t.tz}>{t.label}</option>)}
+            {TIMEZONES.map(zone => <option key={zone.tz} value={zone.tz}>{zone.label}</option>)}
           </select>
           <button className="theme-btn" onClick={() => setDark(d => !d)}>{dark ? "☀️" : "🌙"}</button>
         </div>
@@ -577,12 +580,12 @@ function App() {
             <div className="space-y">
               <div>
                 <label className="field-label">{t.dist}</label>
-                <input type="number" min="1" value={dist} onChange={e => setDist(Number(e.target.value))} />
+                <input type="number" min="1" max="5000" value={dist} onChange={e => setDist(Math.min(5000, Number(e.target.value)))} />
               </div>
               <div>
                 <div className="flex-bw" style={{marginBottom:6}}>
                   <label className="field-label" style={{margin:0}}>{t.speed}</label>
-                  <span style={{fontSize:13, fontWeight:500}}>{speed} км/ч</span>
+                  <span style={{fontSize:13, fontWeight:500}}>{speed} {t.kmh}</span>
                 </div>
                 <input type="range" min="40" max="90" value={speed} onChange={e => setSpeed(Number(e.target.value))} />
                 <div className="flex-bw mt-4"><span className="hint">40</span><span className="hint">90</span></div>
@@ -635,9 +638,9 @@ function App() {
               <div className="space-y-sm">
                 <div style={{fontSize:11, textTransform:"uppercase", letterSpacing:"0.07em"}}>{t.stops}</div>
                 {[
-                  {id:"gas",   label:t.gas,     plus:"+1ч", val:gas,     set:setGas},
-                  {id:"trail", label:t.trailer,  plus:"+1ч", val:trailer, set:setTrailer},
-                  {id:"load",  label:t.loading,  plus:"+2ч", val:loading, set:setLoading},
+                  {id:"gas",   label:t.gas,     plus:t.plusH1, val:gas,     set:setGas},
+                  {id:"trail", label:t.trailer,  plus:t.plusH1, val:trailer, set:setTrailer},
+                  {id:"load",  label:t.loading,  plus:t.plusH2, val:loading, set:setLoading},
                 ].map(({id,label,plus,val,set}) => (
                   <div key={id} className="switch-row">
                     <SwitchEl id={id} checked={val} onChange={set} />
@@ -683,10 +686,10 @@ function App() {
               </div>
               <div>
                 {[
-                  [t.pureDrive,   `${result.pureDrive} ч`],
-                  [t.totalTime,   `${result.totalWay} ч`],
-                  [t.addons,      `${result.extra} ч`],
-                  [t.remaining,   `${Math.floor(result.driveRemaining)} ч`],
+                  [t.pureDrive,   `${result.pureDrive} ${t.h}`],
+                  [t.totalTime,   `${result.totalWay} ${t.h}`],
+                  [t.addons,      `${result.extra} ${t.h}`],
+                  [t.remaining,   `${Math.floor(result.driveRemaining)} ${t.h}`],
                 ].map(([l, v]) => (
                   <div key={l} className="stat-row">
                     <span className="stat-label">{l}</span>
@@ -707,9 +710,9 @@ function App() {
                 const isLast = i === result.schedule.length - 1;
                 const labels = { drive: t.legDrive, break: t.legBreak, rest: t.legRest };
                 const subs = {
-                  drive: `${step.hours.toFixed(1)} ч`,
+                  drive: `${step.hours.toFixed(1)} ${t.h}`,
                   break: t.breakCalc,
-                  rest: "9 ч",
+                  rest: t.restH,
                 };
                 return (
                   <div key={i} className="tl-row">
@@ -735,8 +738,7 @@ function App() {
         </div>
       </div>
 
-      <div className="footer mt-12">{t.author}</div>
-    </div>
+      </div>
   );
 }
 
