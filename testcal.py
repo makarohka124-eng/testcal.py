@@ -249,8 +249,11 @@ function tomorrowISO(tz) {
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
 
-function localeDateRu(date, tz) {
-  return date.toLocaleString("ru-RU", {
+const LANG_LOCALE = { ru: "ru-RU", en: "en-GB", lv: "lv-LV" };
+
+function localeDateRu(date, tz, lang) {
+  const locale = LANG_LOCALE[lang] || "ru-RU";
+  return date.toLocaleString(locale, {
     timeZone: tz, weekday: "long",
     day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
   });
@@ -485,7 +488,7 @@ function App() {
     gas, trailer, loading, ferry, misc,
   }), [useCurrent, startDate, startHour, startMin, tz, dist, speed, mode, alreadyDriven, gas, trailer, loading, ferry, misc]);
 
-  const arrivalLabel = useMemo(() => localeDateRu(result.arrival, tz), [result.arrival, tz]);
+  const arrivalLabel = useMemo(() => localeDateRu(result.arrival, tz, lang) + " " + tzLabel, [result.arrival, tz, lang]);
 
   const fixDiff = useMemo(() => {
     if (!useFix) return null;
