@@ -160,6 +160,78 @@ const TIMEZONES = [
   { label: "FET — Минск",                   tz: "Europe/Minsk" },
 ];
 
+const TR = {
+  ru: {
+    appTitle: "Калькулятор рейса", appSub: "Логистика",
+    departure: "Время выезда", now: "Сейчас",
+    depDate: "Дата выезда", depTime: "Время выезда",
+    routeParams: "Параметры рейса", dist: "Расстояние (км)", speed: "Скорость",
+    mode: "Режим вождения", single: "Одиночка", crew: "Экипаж",
+    alreadyDriven: "Уже проехал сегодня", max: "макс",
+    extras: "Дополнительно", fixTime: "Фикс время выгрузки",
+    fixDate: "Дата FIX", fixTimeLabel: "Время FIX",
+    stops: "Остановки", gas: "Заправка", trailer: "Перецеп", loading: "Загрузка",
+    ferry: "Паром", ferryNo: "Нет", ferryH1: "1 час", ferryH2: "2 часа",
+    other: "Другое (ч)",
+    result: "Результат", arrival: "Расчётное прибытие",
+    reserve: "Запас", late: "Опоздание",
+    pureDrive: "Чистое время езды", totalTime: "Итоговое время",
+    addons: "Допы", remaining: "Остаток вождения",
+    scheduleTitle: "Режим труда и отдыха",
+    legDrive: "Езда", legBreak: "Перерыв 45 мин", legRest: "Отдых 9 ч",
+    breakCalc: "= 1 ч в расчёте",
+    reportLine: "Строка для отчёта", copy: "Копировать", copied: "✓ Скопировано",
+    orType: "или введи:", hours: "Часы", mins: "Мин",
+    author: "Разработано Aerra AI для Kreiss при помощи Yaroslav Makarovskii",
+  },
+  en: {
+    appTitle: "Trip Calculator", appSub: "Logistics",
+    departure: "Departure time", now: "Now",
+    depDate: "Departure date", depTime: "Departure time",
+    routeParams: "Route parameters", dist: "Distance (km)", speed: "Speed",
+    mode: "Driving mode", single: "Solo", crew: "Crew",
+    alreadyDriven: "Already driven today", max: "max",
+    extras: "Extras", fixTime: "Fixed unload time",
+    fixDate: "FIX date", fixTimeLabel: "FIX time",
+    stops: "Stops", gas: "Refuel", trailer: "Swap trailer", loading: "Loading",
+    ferry: "Ferry", ferryNo: "None", ferryH1: "1 hour", ferryH2: "2 hours",
+    other: "Other (h)",
+    result: "Result", arrival: "Estimated arrival",
+    reserve: "Buffer", late: "Delay",
+    pureDrive: "Pure drive time", totalTime: "Total time",
+    addons: "Extras", remaining: "Drive remaining",
+    scheduleTitle: "Work & rest schedule",
+    legDrive: "Drive", legBreak: "Break 45 min", legRest: "Rest 9 h",
+    breakCalc: "= 1 h in calc",
+    reportLine: "Report line", copy: "Copy", copied: "✓ Copied",
+    orType: "or type:", hours: "Hours", mins: "Min",
+    author: "Developed by Aerra AI for Kreiss with Yaroslav Makarovskii",
+  },
+  lv: {
+    appTitle: "Brauciena kalkulators", appSub: "Loģistika",
+    departure: "Izbraukšanas laiks", now: "Tagad",
+    depDate: "Izbraukšanas datums", depTime: "Izbraukšanas laiks",
+    routeParams: "Maršruta parametri", dist: "Attālums (km)", speed: "Ātrums",
+    mode: "Braukšanas režīms", single: "Viens", crew: "Komanda",
+    alreadyDriven: "Jau braukts šodien", max: "maks",
+    extras: "Papildus", fixTime: "Fiksēts izkraušanas laiks",
+    fixDate: "FIX datums", fixTimeLabel: "FIX laiks",
+    stops: "Pieturas", gas: "Degviela", trailer: "Piekabe", loading: "Iekraušana",
+    ferry: "Prāmis", ferryNo: "Nē", ferryH1: "1 stunda", ferryH2: "2 stundas",
+    other: "Cits (h)",
+    result: "Rezultāts", arrival: "Paredzamais ierašanās laiks",
+    reserve: "Rezerve", late: "Kavēšanās",
+    pureDrive: "Tīrais braukšanas laiks", totalTime: "Kopējais laiks",
+    addons: "Papildus", remaining: "Atlikušais braukšanas laiks",
+    scheduleTitle: "Darba un atpūtas režīms",
+    legDrive: "Braukšana", legBreak: "Pārtraukums 45 min", legRest: "Atpūta 9 h",
+    breakCalc: "= 1 h aprēķinā",
+    reportLine: "Atskaites rinda", copy: "Kopēt", copied: "✓ Nokopēts",
+    orType: "vai ievadi:", hours: "Stundas", mins: "Min",
+    author: "Izstrādāts Aerra AI priekš Kreiss ar Yaroslav Makarovskii palīdzību",
+  },
+};
+
 function getNowInTZ(tz) {
   return new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
 }
@@ -293,7 +365,7 @@ function calcArrival({ useCurrent, startDate, startHour, startMin, tz, dist, spe
   const cetNow = getNowInTZ("Europe/Berlin");
   const checkVal = cetNow.getHours() < 12 ? "1/2" : "2/2";
   const a = new Date(arrival.toLocaleString("en-US", { timeZone: "Europe/Berlin" }));
-  const workString = `${checkVal} ETA ${pad(a.getDate())}.${pad(a.getMonth()+1)} ${pad(a.getHours())}:${pad(a.getMinutes())}CET D/H ${Math.floor(driveRemaining)}`;
+  const workString = `${checkVal} ETA ${pad(a.getDate())}.${pad(a.getMonth()+1)} ${pad(a.getHours())}:${pad(a.getMinutes())}CET D/H ${driveRemaining.toFixed(1)}`;
   return { arrival, workString, driveRemaining, pureDrive: pureDrive.toFixed(1), totalWay: totalWay.toFixed(1), extra, restBlocks, breaks45, schedule };
 }
 
@@ -306,7 +378,8 @@ function SwitchEl({ id, checked, onChange }) {
   );
 }
 
-function TimeSliderPicker({ hour, minute, onHourChange, onMinuteChange }) {
+function TimeSliderPicker({ hour, minute, onHourChange, onMinuteChange, t }) {
+  t = t || TR.ru;
   const [rawInput, setRawInput] = useState(`${pad(hour)}:${pad(minute)}`);
   const [inputFocused, setInputFocused] = useState(false);
 
@@ -335,19 +408,19 @@ function TimeSliderPicker({ hour, minute, onHourChange, onMinuteChange }) {
     <div className="time-slider-block">
       <div className="time-display">{pad(hour)}:{pad(minute)}</div>
       <div className="slider-row">
-        <span className="slider-lbl">Часы</span>
+        <span className="slider-lbl">{t.hours}</span>
         <input type="range" min="0" max="23" value={hour}
           onChange={e => { onHourChange(Number(e.target.value)); }} style={{flex:1}} />
         <span className="slider-val">{pad(hour)}</span>
       </div>
       <div className="slider-row">
-        <span className="slider-lbl">Мин</span>
+        <span className="slider-lbl">{t.mins}</span>
         <input type="range" min="0" max="59" value={minute}
           onChange={e => { onMinuteChange(Number(e.target.value)); }} style={{flex:1}} />
         <span className="slider-val">{pad(minute)}</span>
       </div>
       <div className="time-input-row">
-        <span>или введи:</span>
+        <span>{t.orType}</span>
         <input type="text" value={rawInput} placeholder="14:30" style={{width:90}}
           onFocus={() => setInputFocused(true)}
           onChange={handleInputChange}
@@ -383,6 +456,8 @@ function App() {
   const [ferry, setFerry] = useState("0");
   const [misc, setMisc] = useState("0");
   const [copied, setCopied] = useState(false);
+  const [lang, setLang] = useState("ru");
+  const t = TR[lang];
 
   useEffect(() => {
     document.documentElement.className = dark ? "dark" : "";
@@ -440,12 +515,23 @@ function App() {
       <div className="header">
         <div className="header-icon">🚛</div>
         <div>
-          <div className="header-title">Калькулятор рейса</div>
+          <div className="header-title">{t.appTitle}</div>
           <div className="header-sub flex-row" style={{gap:6}}>
-            Логистика · <span className="tz-badge">{tzLabel}</span>
+            {t.appSub} · <span className="tz-badge">{tzLabel}</span>
           </div>
         </div>
         <div style={{marginLeft:"auto", display:"flex", alignItems:"center", gap:10}}>
+          <div style={{display:"flex", gap:3}}>
+            {["ru","en","lv"].map(l => (
+              <button key={l} onClick={() => setLang(l)}
+                style={{height:28, padding:"0 8px", border:"0.5px solid var(--border2)", borderRadius:"var(--radius)",
+                  background: lang===l ? "var(--primary)" : "var(--bg2)",
+                  color: lang===l ? "var(--primary-fg)" : "var(--fg)",
+                  fontFamily:"inherit", fontSize:11, fontWeight:600, cursor:"pointer", textTransform:"uppercase"}}>
+                {l}
+              </button>
+            ))}
+          </div>
           <select value={tz} onChange={e => setTz(e.target.value)}
             style={{height:30, fontSize:12, padding:"0 8px", background:"var(--bg2)", border:"0.5px solid var(--border2)", borderRadius:"var(--radius)", color:"var(--fg)", fontFamily:"inherit", outline:"none", maxWidth:200}}>
             {TIMEZONES.map(t => <option key={t.tz} value={t.tz}>{t.label}</option>)}
@@ -460,24 +546,25 @@ function App() {
           <div className="combined-card">
 
             {/* Время выезда */}
-            <div className="card-title">Время выезда</div>
+            <div className="card-title">{t.departure}</div>
             <div className="switch-row" style={{marginBottom: useCurrent ? 0 : 14}}>
               <SwitchEl id="use-current" checked={useCurrent} onChange={setUseCurrent} />
               <label htmlFor="use-current" style={{cursor:"pointer", fontSize:13}}>
-                Сейчас — <span style={{color:"var(--fg2)"}}>{pad(now.getHours())}:{pad(now.getMinutes())} · {pad(now.getDate())}.{pad(now.getMonth()+1)} ({tzLabel})</span>
+                {t.now} — <span style={{color:"var(--fg2)"}}>{pad(now.getHours())}:{pad(now.getMinutes())} · {pad(now.getDate())}.{pad(now.getMonth()+1)} ({tzLabel})</span>
               </label>
             </div>
             {!useCurrent && (
               <div className="space-y mt-8">
                 <div>
-                  <label className="field-label">Дата выезда</label>
+                  <label className="field-label">{t.depDate}</label>
                   <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
                 </div>
                 <div>
-                  <label className="field-label">Время выезда</label>
+                  <label className="field-label">{t.depTime}</label>
                   <TimeSliderPicker
                     hour={startHour} minute={startMin}
                     onHourChange={setStartHour} onMinuteChange={setStartMin}
+                    lang={lang} t={t}
                   />
                 </div>
               </div>
@@ -486,31 +573,31 @@ function App() {
             <div className="section-sep"></div>
 
             {/* Параметры рейса */}
-            <div className="card-title">Параметры рейса</div>
+            <div className="card-title">{t.routeParams}</div>
             <div className="space-y">
               <div>
-                <label className="field-label">Расстояние (км)</label>
+                <label className="field-label">{t.dist}</label>
                 <input type="number" min="1" value={dist} onChange={e => setDist(Number(e.target.value))} />
               </div>
               <div>
                 <div className="flex-bw" style={{marginBottom:6}}>
-                  <label className="field-label" style={{margin:0}}>Скорость</label>
+                  <label className="field-label" style={{margin:0}}>{t.speed}</label>
                   <span style={{fontSize:13, fontWeight:500}}>{speed} км/ч</span>
                 </div>
                 <input type="range" min="40" max="90" value={speed} onChange={e => setSpeed(Number(e.target.value))} />
                 <div className="flex-bw mt-4"><span className="hint">40</span><span className="hint">90</span></div>
               </div>
               <div>
-                <label className="field-label">Режим вождения</label>
+                <label className="field-label">{t.mode}</label>
                 <div className="radio-group">
-                  <div className={`radio-btn ${mode==="single"?"active":""}`} onClick={() => setMode("single")}>Одиночка</div>
-                  <div className={`radio-btn ${mode==="crew"?"active":""}`} onClick={() => setMode("crew")}>Экипаж</div>
+                  <div className={`radio-btn ${mode==="single"?"active":""}`} onClick={() => setMode("single")}>{t.single}</div>
+                  <div className={`radio-btn ${mode==="crew"?"active":""}`} onClick={() => setMode("crew")}>{t.crew}</div>
                 </div>
               </div>
               <div>
                 <div className="flex-bw" style={{marginBottom:5}}>
-                  <label className="field-label" style={{margin:0}}>Уже проехал сегодня</label>
-                  <span className="hint">макс {maxDrive}ч</span>
+                  <label className="field-label" style={{margin:0}}>{t.alreadyDriven}</label>
+                  <span className="hint">{t.max} {maxDrive}ч</span>
                 </div>
                 <input type="number" min="0" max={maxDrive} step="0.5" value={alreadyDriven}
                   onChange={e => setAlreadyDriven(Math.min(maxDrive, Number(e.target.value)))} />
@@ -520,24 +607,25 @@ function App() {
             <div className="section-sep"></div>
 
             {/* Дополнительно */}
-            <div className="card-title">Дополнительно</div>
+            <div className="card-title">{t.extras}</div>
             <div className="space-y">
               <div>
                 <div className="switch-row">
                   <SwitchEl id="use-fix" checked={useFix} onChange={setUseFix} />
-                  <label htmlFor="use-fix" style={{cursor:"pointer", fontSize:13}}>Фикс время выгрузки</label>
+                  <label htmlFor="use-fix" style={{cursor:"pointer", fontSize:13}}>{t.fixTime}</label>
                 </div>
                 {useFix && (
                   <div className="pl-10 mt-8 space-y">
                     <div>
-                      <label className="field-label">Дата FIX</label>
+                      <label className="field-label">{t.fixDate}</label>
                       <input type="date" value={fixDate} onChange={e => setFixDate(e.target.value)} />
                     </div>
                     <div>
-                      <label className="field-label">Время FIX</label>
+                      <label className="field-label">{t.fixTimeLabel}</label>
                       <TimeSliderPicker
                         hour={fixHour} minute={fixMin}
                         onHourChange={setFixHour} onMinuteChange={setFixMin}
+                        lang={lang} t={t}
                       />
                     </div>
                   </div>
@@ -545,11 +633,11 @@ function App() {
               </div>
               <div className="sep"></div>
               <div className="space-y-sm">
-                <div style={{fontSize:11, textTransform:"uppercase", letterSpacing:"0.07em"}}>Остановки</div>
+                <div style={{fontSize:11, textTransform:"uppercase", letterSpacing:"0.07em"}}>{t.stops}</div>
                 {[
-                  {id:"gas",   label:"Заправка", plus:"+1ч", val:gas,     set:setGas},
-                  {id:"trail", label:"Перецеп",  plus:"+1ч", val:trailer, set:setTrailer},
-                  {id:"load",  label:"Загрузка", plus:"+2ч", val:loading, set:setLoading},
+                  {id:"gas",   label:t.gas,     plus:"+1ч", val:gas,     set:setGas},
+                  {id:"trail", label:t.trailer,  plus:"+1ч", val:trailer, set:setTrailer},
+                  {id:"load",  label:t.loading,  plus:"+2ч", val:loading, set:setLoading},
                 ].map(({id,label,plus,val,set}) => (
                   <div key={id} className="switch-row">
                     <SwitchEl id={id} checked={val} onChange={set} />
@@ -561,13 +649,13 @@ function App() {
               </div>
               <div className="grid2">
                 <div>
-                  <label className="field-label">Паром</label>
+                  <label className="field-label">{t.ferry}</label>
                   <select value={ferry} onChange={e => setFerry(e.target.value)}>
-                    <option value="0">Нет</option><option value="1">1 час</option><option value="2">2 часа</option>
+                    <option value="0">{t.ferryNo}</option><option value="1">{t.ferryH1}</option><option value="2">{t.ferryH2}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="field-label">Другое (ч)</label>
+                  <label className="field-label">{t.other}</label>
                   <select value={misc} onChange={e => setMisc(e.target.value)}>
                     {[0,1,2,3,4,5].map(v => <option key={v} value={v}>{v}</option>)}
                   </select>
@@ -581,24 +669,24 @@ function App() {
         {/* RIGHT — Результат */}
         <div className="right-col">
           <div className="card">
-            <div className="card-title">Результат</div>
+            <div className="card-title">{t.result}</div>
             <div className="grid2" style={{gap:20, alignItems:"start"}}>
               <div>
-                <div className="result-label">Расчётное прибытие</div>
+                <div className="result-label">{t.arrival}</div>
                 <div className="result-arrival">{arrivalLabel}</div>
                 {useFix && fixDiff !== null && (
                   <div className={`alert mt-12 ${fixOk?"alert-success":"alert-danger"}`}>
                     <span>{fixOk ? "✓" : "✗"}</span>
-                    <span>{fixOk ? `Запас: ${fixH}ч ${fixM}м` : `Опоздание: ${fixH}ч ${fixM}м`}</span>
+                    <span>{fixOk ? `${t.reserve}: ${fixH}ч ${fixM}м` : `${t.late}: ${fixH}ч ${fixM}м`}</span>
                   </div>
                 )}
               </div>
               <div>
                 {[
-                  ["Чистое время езды", `${result.pureDrive} ч`],
-                  ["Итоговое время",    `${result.totalWay} ч`],
-                  ["Допы",              `${result.extra} ч`],
-                  ["Остаток вождения",  `${Math.floor(result.driveRemaining)} ч`],
+                  [t.pureDrive,   `${result.pureDrive} ч`],
+                  [t.totalTime,   `${result.totalWay} ч`],
+                  [t.addons,      `${result.extra} ч`],
+                  [t.remaining,   `${Math.floor(result.driveRemaining)} ч`],
                 ].map(([l, v]) => (
                   <div key={l} className="stat-row">
                     <span className="stat-label">{l}</span>
@@ -608,19 +696,19 @@ function App() {
               </div>
             </div>
             <div className="sep mt-12" style={{marginBottom:12}}></div>
-            <div className="result-label">Режим труда и отдыха</div>
+            <div className="result-label">{t.scheduleTitle}</div>
             <div className="legend-row">
-              <span className="legend-item"><span className="legend-dot" style={{background:"var(--fg)"}}></span>Езда</span>
-              <span className="legend-item"><span className="legend-dot" style={{background:"#f59e0b"}}></span>Перерыв 45 мин</span>
-              <span className="legend-item"><span className="legend-dot" style={{background:"#6366f1"}}></span>Отдых 9 ч</span>
+              <span className="legend-item"><span className="legend-dot" style={{background:"var(--fg)"}}></span>{t.legDrive}</span>
+              <span className="legend-item"><span className="legend-dot" style={{background:"#f59e0b"}}></span>{t.legBreak}</span>
+              <span className="legend-item"><span className="legend-dot" style={{background:"#6366f1"}}></span>{t.legRest}</span>
             </div>
             <div className="timeline">
               {result.schedule.map((step, i) => {
                 const isLast = i === result.schedule.length - 1;
-                const labels = { drive: "Езда", break: "Перерыв 45 мин", rest: "Отдых 9 ч" };
+                const labels = { drive: t.legDrive, break: t.legBreak, rest: t.legRest };
                 const subs = {
                   drive: `${step.hours.toFixed(1)} ч`,
-                  break: "= 1 ч в расчёте",
+                  break: t.breakCalc,
                   rest: "9 ч",
                 };
                 return (
@@ -638,16 +726,16 @@ function App() {
               })}
             </div>
             <div className="sep mt-12" style={{marginBottom:12}}></div>
-            <div className="result-label">Строка для отчёта</div>
+            <div className="result-label">{t.reportLine}</div>
             <div className="code-row">
               <code>{result.workString}</code>
-              <button className="copy-btn" onClick={copy}>{copied ? "✓ Скопировано" : "Копировать"}</button>
+              <button className="copy-btn" onClick={copy}>{copied ? t.copied : t.copy}</button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="footer mt-12">Разработал Yaroslav Makarovskyi</div>
+      <div className="footer mt-12">{t.author}</div>
     </div>
   );
 }
