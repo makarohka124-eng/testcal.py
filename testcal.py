@@ -176,7 +176,7 @@ const TR = {
     result: "Результат", arrival: "Расчётное прибытие",
     reserve: "Запас", late: "Опоздание",
     pureDrive: "Чистое время езды", totalTime: "Итоговое время",
-    addons: "Допы", remaining: "Остаток вождения", restBlocks: "Использовано девяток",
+    addons: "Допы", remaining: "Остаток вождения", restBlocks: "9-часовых пауз",
     scheduleTitle: "Режим труда и отдыха",
     legDrive: "Езда", legBreak: "Перерыв 45 мин", legRest: "Отдых 9 ч",
     breakCalc: "= 1 ч в расчёте",
