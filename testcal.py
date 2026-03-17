@@ -176,7 +176,7 @@ const TR = {
     result: "Результат", arrival: "Расчётное прибытие",
     reserve: "Запас", late: "Опоздание",
     pureDrive: "Чистое время езды", totalTime: "Итоговое время",
-    addons: "Допы", remaining: "Остаток вождения", restBlocks: "9-часовых пауз",
+    addons: "Допы", remaining: "Остаток вождения", restBlocks: "Использовано 9-часовых пауз",
     scheduleTitle: "Режим труда и отдыха",
     legDrive: "Езда", legBreak: "Перерыв 45 мин", legRest: "Отдых 9 ч",
     breakCalc: "= 1 ч в расчёте",
@@ -200,7 +200,7 @@ const TR = {
     result: "Result", arrival: "Estimated arrival",
     reserve: "Buffer", late: "Delay",
     pureDrive: "Pure drive time", totalTime: "Total time",
-    addons: "Extras", remaining: "Drive remaining", restBlocks: "Rest blocks used",
+    addons: "Extras", remaining: "Drive remaining", restBlocks: "Used 9h rest breaks",
     scheduleTitle: "Work & rest schedule",
     legDrive: "Drive", legBreak: "Break 45 min", legRest: "Rest 9 h",
     breakCalc: "= 1 h in calc",
@@ -224,7 +224,7 @@ const TR = {
     result: "Rezultāts", arrival: "Paredzamais ierašanās laiks",
     reserve: "Rezerve", late: "Kavēšanās",
     pureDrive: "Tīrais braukšanas laiks", totalTime: "Kopējais laiks",
-    addons: "Papildus", remaining: "Atlikušais braukšanas laiks", restBlocks: "Izmantotās devītnieces",
+    addons: "Papildus", remaining: "Atlikušais braukšanas laiks", restBlocks: "Izmantoti 9h atpūtas pārtraukumi",
     scheduleTitle: "Darba un atpūtas režīms",
     legDrive: "Braukšana", legBreak: "Pārtraukums 45 min", legRest: "Atpūta 9 h",
     breakCalc: "= 1 h aprēķinā",
@@ -253,10 +253,12 @@ const LANG_LOCALE = { ru: "ru-RU", en: "en-GB", lv: "lv-LV" };
 
 function localeDateRu(date, tz, lang) {
   const locale = LANG_LOCALE[lang] || "ru-RU";
-  return date.toLocaleString(locale, {
-    timeZone: tz, weekday: "long",
-    day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
-  });
+  const weekday = date.toLocaleString(locale, { timeZone: tz, weekday: "long" });
+  const d = date.toLocaleString("en-GB", { timeZone: tz, day: "2-digit" });
+  const m = date.toLocaleString("en-GB", { timeZone: tz, month: "2-digit" });
+  const hh = date.toLocaleString("en-GB", { timeZone: tz, hour: "2-digit", hour12: false });
+  const mm = date.toLocaleString("en-GB", { timeZone: tz, minute: "2-digit" });
+  return `${weekday} ${d}/${m} ${pad(+hh)}:${pad(+mm)}`;
 }
 
 function buildSchedule({ alreadyDriven, pureDrive, mode }) {
