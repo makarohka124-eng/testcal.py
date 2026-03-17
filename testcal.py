@@ -42,9 +42,12 @@ HTML = """
   --primary:#fafafa;--primary-fg:#09090b;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--fg);font-size:14px;transition:background .2s,color .2s}
-.app{max-width:720px;margin:0 auto;padding:24px 16px 48px}
+.app{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
 .card{background:var(--card-bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:12px;transition:background .2s,border-color .2s}
 .card-title{font-size:11px;font-weight:500;color:var(--fg);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.main-layout{display:grid;grid-template-columns:420px 1fr;gap:12px;align-items:start}
+.combined-card{background:var(--card-bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;transition:background .2s,border-color .2s}
+.section-sep{height:0.5px;background:var(--border);margin:16px 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .space-y>*+*{margin-top:14px}
@@ -79,7 +82,7 @@ input[type=range]{
 .switch{position:relative;width:36px;height:20px;flex-shrink:0}
 .switch input{opacity:0;width:0;height:0}
 .switch-track{position:absolute;inset:0;background:var(--border2);border-radius:100px;transition:background .2s;cursor:pointer}
-.switch input:checked+.switch-track{background:var(--primary)}
+.switch input:checked+.switch-track{background:#16a34a}
 .switch-track::after{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .2s}
 .switch input:checked+.switch-track::after{transform:translateX(16px)}
 .switch-row{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
@@ -442,199 +445,205 @@ function App() {
             Логистика · <span className="tz-badge">{tzLabel}</span>
           </div>
         </div>
-        <button className="theme-btn" onClick={() => setDark(d => !d)}>{dark ? "☀️" : "🌙"}</button>
-      </div>
-
-      {/* Timezone */}
-      <div className="card">
-        <div className="card-title">Часовой пояс</div>
-        <select value={tz} onChange={e => setTz(e.target.value)}>
-          {TIMEZONES.map(t => <option key={t.tz} value={t.tz}>{t.label}</option>)}
-        </select>
-      </div>
-
-      {/* Departure */}
-      <div className="card">
-        <div className="card-title">Время выезда</div>
-        <div className="switch-row" style={{marginBottom: useCurrent ? 0 : 14}}>
-          <SwitchEl id="use-current" checked={useCurrent} onChange={setUseCurrent} />
-          <label htmlFor="use-current" style={{cursor:"pointer", fontSize:13}}>
-            Сейчас — <span style={{color:"var(--fg2)"}}>{pad(now.getHours())}:{pad(now.getMinutes())} · {pad(now.getDate())}.{pad(now.getMonth()+1)} ({tzLabel})</span>
-          </label>
+        <div style={{marginLeft:"auto", display:"flex", alignItems:"center", gap:10}}>
+          <select value={tz} onChange={e => setTz(e.target.value)}
+            style={{height:30, fontSize:12, padding:"0 8px", background:"var(--bg2)", border:"0.5px solid var(--border2)", borderRadius:"var(--radius)", color:"var(--fg)", fontFamily:"inherit", outline:"none", maxWidth:200}}>
+            {TIMEZONES.map(t => <option key={t.tz} value={t.tz}>{t.label}</option>)}
+          </select>
+          <button className="theme-btn" onClick={() => setDark(d => !d)}>{dark ? "☀️" : "🌙"}</button>
         </div>
-        {!useCurrent && (
-          <div className="space-y mt-8">
-            <div>
-              <label className="field-label">Дата выезда</label>
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-            </div>
-            <div>
-              <label className="field-label">Время выезда</label>
-              <TimeSliderPicker
-                hour={startHour} minute={startMin}
-                onHourChange={setStartHour} onMinuteChange={setStartMin}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Route + Extras */}
-      <div className="grid2" style={{alignItems:"start"}}>
-        <div className="card">
-          <div className="card-title">Параметры рейса</div>
-          <div className="space-y">
-            <div>
-              <label className="field-label">Расстояние (км)</label>
-              <input type="number" min="1" value={dist} onChange={e => setDist(Number(e.target.value))} />
-            </div>
-            <div>
-              <div className="flex-bw" style={{marginBottom:6}}>
-                <label className="field-label" style={{margin:0}}>Скорость</label>
-                <span style={{fontSize:13, fontWeight:500}}>{speed} км/ч</span>
-              </div>
-              <input type="range" min="40" max="90" value={speed} onChange={e => setSpeed(Number(e.target.value))} />
-              <div className="flex-bw mt-4"><span className="hint">40</span><span className="hint">90</span></div>
-            </div>
-            <div>
-              <label className="field-label">Режим вождения</label>
-              <div className="radio-group">
-                <div className={`radio-btn ${mode==="single"?"active":""}`} onClick={() => setMode("single")}>Одиночка</div>
-                <div className={`radio-btn ${mode==="crew"?"active":""}`} onClick={() => setMode("crew")}>Экипаж</div>
-              </div>
-            </div>
-            <div>
-              <div className="flex-bw" style={{marginBottom:5}}>
-                <label className="field-label" style={{margin:0}}>Уже проехал сегодня</label>
-                <span className="hint">макс {maxDrive}ч</span>
-              </div>
-              <input type="number" min="0" max={maxDrive} step="0.5" value={alreadyDriven}
-                onChange={e => setAlreadyDriven(Math.min(maxDrive, Number(e.target.value)))} />
-            </div>
-          </div>
-        </div>
+      <div className="main-layout">
+        {/* LEFT — одна большая карточка */}
+        <div className="left-col">
+          <div className="combined-card">
 
-        <div className="card">
-          <div className="card-title">Дополнительно</div>
-          <div className="space-y">
-            <div>
-              <div className="switch-row">
-                <SwitchEl id="use-fix" checked={useFix} onChange={setUseFix} />
-                <label htmlFor="use-fix" style={{cursor:"pointer", fontSize:13}}>Фикс время выгрузки</label>
-              </div>
-              {useFix && (
-                <div className="pl-10 mt-8 space-y">
-                  <div>
-                    <label className="field-label">Дата FIX</label>
-                    <input type="date" value={fixDate} onChange={e => setFixDate(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="field-label">Время FIX</label>
-                    <TimeSliderPicker
-                      hour={fixHour} minute={fixMin}
-                      onHourChange={setFixHour} onMinuteChange={setFixMin}
-                    />
-                  </div>
+            {/* Время выезда */}
+            <div className="card-title">Время выезда</div>
+            <div className="switch-row" style={{marginBottom: useCurrent ? 0 : 14}}>
+              <SwitchEl id="use-current" checked={useCurrent} onChange={setUseCurrent} />
+              <label htmlFor="use-current" style={{cursor:"pointer", fontSize:13}}>
+                Сейчас — <span style={{color:"var(--fg2)"}}>{pad(now.getHours())}:{pad(now.getMinutes())} · {pad(now.getDate())}.{pad(now.getMonth()+1)} ({tzLabel})</span>
+              </label>
+            </div>
+            {!useCurrent && (
+              <div className="space-y mt-8">
+                <div>
+                  <label className="field-label">Дата выезда</label>
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
                 </div>
-              )}
-            </div>
-            <div className="sep"></div>
-            <div className="space-y-sm">
-              <div style={{fontSize:11, textTransform:"uppercase", letterSpacing:"0.07em"}}>Остановки</div>
-              {[
-                {id:"gas",   label:"Заправка", plus:"+1ч", val:gas,     set:setGas},
-                {id:"trail", label:"Перецеп",  plus:"+1ч", val:trailer, set:setTrailer},
-                {id:"load",  label:"Загрузка", plus:"+2ч", val:loading, set:setLoading},
-              ].map(({id,label,plus,val,set}) => (
-                <div key={id} className="switch-row">
-                  <SwitchEl id={id} checked={val} onChange={set} />
-                  <label htmlFor={id} style={{cursor:"pointer", fontSize:13, display:"flex", gap:6, alignItems:"center"}}>
-                    {label} <span className="badge">{plus}</span>
-                  </label>
+                <div>
+                  <label className="field-label">Время выезда</label>
+                  <TimeSliderPicker
+                    hour={startHour} minute={startMin}
+                    onHourChange={setStartHour} onMinuteChange={setStartMin}
+                  />
                 </div>
-              ))}
-            </div>
-            <div className="grid2">
-              <div>
-                <label className="field-label">Паром</label>
-                <select value={ferry} onChange={e => setFerry(e.target.value)}>
-                  <option value="0">Нет</option><option value="1">1 час</option><option value="2">2 часа</option>
-                </select>
-              </div>
-              <div>
-                <label className="field-label">Другое (ч)</label>
-                <select value={misc} onChange={e => setMisc(e.target.value)}>
-                  {[0,1,2,3,4,5].map(v => <option key={v} value={v}>{v}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Result */}
-      <div className="card">
-        <div className="card-title">Результат</div>
-        <div className="grid2" style={{gap:20, alignItems:"start"}}>
-          <div>
-            <div className="result-label">Расчётное прибытие</div>
-            <div className="result-arrival">{arrivalLabel}</div>
-            {useFix && fixDiff !== null && (
-              <div className={`alert mt-12 ${fixOk?"alert-success":"alert-danger"}`}>
-                <span>{fixOk ? "✓" : "✗"}</span>
-                <span>{fixOk ? `Запас: ${fixH}ч ${fixM}м` : `Опоздание: ${fixH}ч ${fixM}м`}</span>
               </div>
             )}
-          </div>
-          <div>
-            {[
-              ["Чистое время езды", `${result.pureDrive} ч`],
-              ["Итоговое время",    `${result.totalWay} ч`],
-              ["Допы",              `${result.extra} ч`],
-              ["Остаток вождения",  `${Math.floor(result.driveRemaining)} ч`],
-            ].map(([l, v]) => (
-              <div key={l} className="stat-row">
-                <span className="stat-label">{l}</span>
-                <span className="stat-value">{v}</span>
+
+            <div className="section-sep"></div>
+
+            {/* Параметры рейса */}
+            <div className="card-title">Параметры рейса</div>
+            <div className="space-y">
+              <div>
+                <label className="field-label">Расстояние (км)</label>
+                <input type="number" min="1" value={dist} onChange={e => setDist(Number(e.target.value))} />
               </div>
-            ))}
-          </div>
-        </div>
-        <div className="sep mt-12" style={{marginBottom:12}}></div>
-        <div className="result-label">Режим труда и отдыха</div>
-        <div className="legend-row">
-          <span className="legend-item"><span className="legend-dot" style={{background:"var(--fg)"}}></span>Езда</span>
-          <span className="legend-item"><span className="legend-dot" style={{background:"#f59e0b"}}></span>Перерыв 45 мин</span>
-          <span className="legend-item"><span className="legend-dot" style={{background:"#6366f1"}}></span>Отдых 9 ч</span>
-        </div>
-        <div className="timeline">
-          {result.schedule.map((step, i) => {
-            const isLast = i === result.schedule.length - 1;
-            const labels = { drive: "Езда", break: "Перерыв 45 мин", rest: "Отдых 9 ч" };
-            const subs = {
-              drive: `${step.hours.toFixed(1)} ч`,
-              break: "= 1 ч в расчёте",
-              rest: "9 ч",
-            };
-            return (
-              <div key={i} className="tl-row">
-                <div className="tl-dot-col">
-                  <div className={`tl-dot ${step.type}`}></div>
-                  {!isLast && <div className="tl-line"></div>}
+              <div>
+                <div className="flex-bw" style={{marginBottom:6}}>
+                  <label className="field-label" style={{margin:0}}>Скорость</label>
+                  <span style={{fontSize:13, fontWeight:500}}>{speed} км/ч</span>
                 </div>
-                <div className="tl-body">
-                  <span className="tl-label">{labels[step.type]}</span>
-                  <span className={`tl-tag ${step.type}`}>{subs[step.type]}</span>
+                <input type="range" min="40" max="90" value={speed} onChange={e => setSpeed(Number(e.target.value))} />
+                <div className="flex-bw mt-4"><span className="hint">40</span><span className="hint">90</span></div>
+              </div>
+              <div>
+                <label className="field-label">Режим вождения</label>
+                <div className="radio-group">
+                  <div className={`radio-btn ${mode==="single"?"active":""}`} onClick={() => setMode("single")}>Одиночка</div>
+                  <div className={`radio-btn ${mode==="crew"?"active":""}`} onClick={() => setMode("crew")}>Экипаж</div>
                 </div>
               </div>
-            );
-          })}
+              <div>
+                <div className="flex-bw" style={{marginBottom:5}}>
+                  <label className="field-label" style={{margin:0}}>Уже проехал сегодня</label>
+                  <span className="hint">макс {maxDrive}ч</span>
+                </div>
+                <input type="number" min="0" max={maxDrive} step="0.5" value={alreadyDriven}
+                  onChange={e => setAlreadyDriven(Math.min(maxDrive, Number(e.target.value)))} />
+              </div>
+            </div>
+
+            <div className="section-sep"></div>
+
+            {/* Дополнительно */}
+            <div className="card-title">Дополнительно</div>
+            <div className="space-y">
+              <div>
+                <div className="switch-row">
+                  <SwitchEl id="use-fix" checked={useFix} onChange={setUseFix} />
+                  <label htmlFor="use-fix" style={{cursor:"pointer", fontSize:13}}>Фикс время выгрузки</label>
+                </div>
+                {useFix && (
+                  <div className="pl-10 mt-8 space-y">
+                    <div>
+                      <label className="field-label">Дата FIX</label>
+                      <input type="date" value={fixDate} onChange={e => setFixDate(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="field-label">Время FIX</label>
+                      <TimeSliderPicker
+                        hour={fixHour} minute={fixMin}
+                        onHourChange={setFixHour} onMinuteChange={setFixMin}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="sep"></div>
+              <div className="space-y-sm">
+                <div style={{fontSize:11, textTransform:"uppercase", letterSpacing:"0.07em"}}>Остановки</div>
+                {[
+                  {id:"gas",   label:"Заправка", plus:"+1ч", val:gas,     set:setGas},
+                  {id:"trail", label:"Перецеп",  plus:"+1ч", val:trailer, set:setTrailer},
+                  {id:"load",  label:"Загрузка", plus:"+2ч", val:loading, set:setLoading},
+                ].map(({id,label,plus,val,set}) => (
+                  <div key={id} className="switch-row">
+                    <SwitchEl id={id} checked={val} onChange={set} />
+                    <label htmlFor={id} style={{cursor:"pointer", fontSize:13, display:"flex", gap:6, alignItems:"center"}}>
+                      {label} <span className="badge">{plus}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div className="grid2">
+                <div>
+                  <label className="field-label">Паром</label>
+                  <select value={ferry} onChange={e => setFerry(e.target.value)}>
+                    <option value="0">Нет</option><option value="1">1 час</option><option value="2">2 часа</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="field-label">Другое (ч)</label>
+                  <select value={misc} onChange={e => setMisc(e.target.value)}>
+                    {[0,1,2,3,4,5].map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
-        <div className="sep mt-12" style={{marginBottom:12}}></div>
-        <div className="result-label">Строка для отчёта</div>
-        <div className="code-row">
-          <code>{result.workString}</code>
-          <button className="copy-btn" onClick={copy}>{copied ? "✓ Скопировано" : "Копировать"}</button>
+
+        {/* RIGHT — Результат */}
+        <div className="right-col">
+          <div className="card">
+            <div className="card-title">Результат</div>
+            <div className="grid2" style={{gap:20, alignItems:"start"}}>
+              <div>
+                <div className="result-label">Расчётное прибытие</div>
+                <div className="result-arrival">{arrivalLabel}</div>
+                {useFix && fixDiff !== null && (
+                  <div className={`alert mt-12 ${fixOk?"alert-success":"alert-danger"}`}>
+                    <span>{fixOk ? "✓" : "✗"}</span>
+                    <span>{fixOk ? `Запас: ${fixH}ч ${fixM}м` : `Опоздание: ${fixH}ч ${fixM}м`}</span>
+                  </div>
+                )}
+              </div>
+              <div>
+                {[
+                  ["Чистое время езды", `${result.pureDrive} ч`],
+                  ["Итоговое время",    `${result.totalWay} ч`],
+                  ["Допы",              `${result.extra} ч`],
+                  ["Остаток вождения",  `${Math.floor(result.driveRemaining)} ч`],
+                ].map(([l, v]) => (
+                  <div key={l} className="stat-row">
+                    <span className="stat-label">{l}</span>
+                    <span className="stat-value">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="sep mt-12" style={{marginBottom:12}}></div>
+            <div className="result-label">Режим труда и отдыха</div>
+            <div className="legend-row">
+              <span className="legend-item"><span className="legend-dot" style={{background:"var(--fg)"}}></span>Езда</span>
+              <span className="legend-item"><span className="legend-dot" style={{background:"#f59e0b"}}></span>Перерыв 45 мин</span>
+              <span className="legend-item"><span className="legend-dot" style={{background:"#6366f1"}}></span>Отдых 9 ч</span>
+            </div>
+            <div className="timeline">
+              {result.schedule.map((step, i) => {
+                const isLast = i === result.schedule.length - 1;
+                const labels = { drive: "Езда", break: "Перерыв 45 мин", rest: "Отдых 9 ч" };
+                const subs = {
+                  drive: `${step.hours.toFixed(1)} ч`,
+                  break: "= 1 ч в расчёте",
+                  rest: "9 ч",
+                };
+                return (
+                  <div key={i} className="tl-row">
+                    <div className="tl-dot-col">
+                      <div className={`tl-dot ${step.type}`}></div>
+                      {!isLast && <div className="tl-line"></div>}
+                    </div>
+                    <div className="tl-body">
+                      <span className="tl-label">{labels[step.type]}</span>
+                      <span className={`tl-tag ${step.type}`}>{subs[step.type]}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="sep mt-12" style={{marginBottom:12}}></div>
+            <div className="result-label">Строка для отчёта</div>
+            <div className="code-row">
+              <code>{result.workString}</code>
+              <button className="copy-btn" onClick={copy}>{copied ? "✓ Скопировано" : "Копировать"}</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -649,4 +658,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </html>
 """
 
-components.html(HTML, height=1050, scrolling=True)
+components.html(HTML, height=950, scrolling=True)
